@@ -1,0 +1,34 @@
+services:
+  mmseg:
+    image: mmlab/mmseg
+    container_name: mmseg
+    network_mode: host
+    build:
+      context: ../../..
+      dockerfile: thirdparty/mmsegmentation/docker/Dockerfile
+      args:
+        COMPOSE_BAKE: true
+    runtime: nvidia
+    shm_size: ${SHM_SIZE:-200G}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ../../../../EgoNRG:/root/EgoNRG
+      - /storage/frank_regal/datasets/EgoNRG-Reduced:/root/datasets/EgoNRG
+      - /storage/frank_regal/datasets/coco_stuff10k:/root/datasets/coco_stuff10k
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/dri:/dev/dri
+      - ${HOME}/.Xauthority:/root/.Xauthority:rw
+    stdin_open: true
+    tty: true
+    entrypoint: /entrypoint.sh -u "$UID_GID" -n "$UNAME"

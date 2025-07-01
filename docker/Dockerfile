@@ -5,6 +5,8 @@ ARG MMCV="2.0.1"
 
 FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
 
+SHELL ["/bin/bash", "-c"]
+
 ENV TORCH_CUDA_ARCH_LIST="6.0 6.1 7.0+PTX"
 ENV TORCH_NVCC_FLAGS="-Xfatbin -compress-all"
 ENV CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"
@@ -33,3 +35,29 @@ WORKDIR /mmsegmentation
 ENV FORCE_CUDA="1"
 RUN pip install -r requirements.txt
 RUN pip install --no-cache-dir -e .
+
+# Install other dependencies
+RUN DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y \
+    && apt install -y software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt update \
+    && apt install -y \
+    apt-utils \
+    curl \
+    sudo \
+    nano \
+    vim \
+    tmux \
+    wget \
+    x11-apps \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Initialize conda and add to bashrc
+RUN conda init bash && \
+    echo -e "PS1='\e[1m\e[93m\u\e[97m@\e[93m\h:\e[35m\w\e[0m\e[97m#\e[0m '" >> ~/.bashrc
+
+# Copy entrypoint script
+COPY ./thirdparty/mmsegmentation/docker/entrypoint.sh /entrypoint.sh
+ENTRYPOINT /entrypoint.sh
