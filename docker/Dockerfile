@@ -30,7 +30,7 @@ RUN ["/bin/bash", "-c", "mim install mmengine"]
 RUN ["/bin/bash", "-c", "mim install mmcv==${MMCV}"]
 
 # Install MMSegmentation
-RUN git clone -b main https://github.com/open-mmlab/mmsegmentation.git /mmsegmentation
+RUN git clone -b main https://github.com/frank-Regal/mmsegmentation.git /mmsegmentation
 WORKDIR /mmsegmentation
 ENV FORCE_CUDA="1"
 RUN pip install -r requirements.txt
@@ -56,6 +56,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y \
 
 # Initialize conda and add to bashrc
 RUN conda init bash && \
+    echo 'export PYTHONPATH=/root/EgoNRG:$PYTHONPATH' >> ~/.bashrc && \
     echo -e "PS1='\e[1m\e[93m\u\e[97m@\e[93m\h:\e[35m\w\e[0m\e[97m#\e[0m '" >> ~/.bashrc
 
 # Copy entrypoint script
